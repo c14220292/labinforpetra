@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Petra Informatics Lab</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: #f5f5f5;
+        }
+
+        .form-container {
+            max-width: 440px;
+            height: 480px;
+            margin-left: 160px;
+        }
+
+        .left-panel h1 {
+            font-size: 40px;
+            margin-bottom: -10px;
+        }
+
+        .left-panel p {
+            color: #555;
+            margin-bottom: 36px;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: none;
+            background-color: #d3d3d3;
+            font-size: 16px;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 463px;
+            padding: 12px;
+            font-size: 16px;
+            color: white;
+            background-color: #12264a;
+            border: none;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        a {
+            color: black;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+
+        small {
+            font-size: 14px;
+            display: block;
+            margin-top: 8px;
+        }
+
+        .right-panel {
+            flex: 1;
+            background-image: url("https://informatics.petra.ac.id/wp-content/uploads/2023/07/GSP_7832.jpg");
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .logos {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logos img {
+            height: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="left-panel">
+        <div class="form-container">
+            <h1>Welcome to Petra<br>Informatics Laboratory</h1>
+            <p>Log in to access our lab properties</p>
+
+            <form action="php/login.php" method="POST">
+                <input type="email" placeholder="Email" name="email" required />
+                <input type="password" placeholder="Password" name="password" required />
+                <button type="submit">Log In</button>
+            </form>
+
+
+            <small>Don't have an account? You can register <a href="register.html">here</a></small>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="logos">
+            <img src="https://upload.wikimedia.org/wikipedia/id/thumb/4/4d/UK_PETRA_LOGO.svg/1200px-UK_PETRA_LOGO.svg.png"
+                alt="Petra Logo" />
+            <img src="https://petra.ac.id/img/logo-text.2e8a4502.png" alt="PCU Logo" />
+        </div>
+    </div>
+</body>
+
+</html>
