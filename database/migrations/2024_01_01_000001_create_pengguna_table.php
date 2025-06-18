@@ -12,7 +12,9 @@ return new class extends Migration
             $table->id('id_pengguna');
             $table->string('nama_pengguna', 100);
             $table->string('email', 100)->unique();
-            $table->string('password');
+            $table->string('password')->nullable();
+            $table->string('google_id')->nullable()->unique();
+            $table->string('avatar')->nullable();
             $table->enum('role', ['kepalalab', 'asistenlab', 'admin'])->nullable();
             $table->datetime('last_login')->nullable();
             $table->timestamps();

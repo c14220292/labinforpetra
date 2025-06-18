@@ -17,6 +17,8 @@ class Pengguna extends Authenticatable
         'nama_pengguna',
         'email',
         'password',
+        'google_id',
+        'avatar',
         'role',
         'last_login',
     ];
@@ -36,6 +38,11 @@ class Pengguna extends Authenticatable
         return $this->belongsToMany(Laboratorium::class, 'pengguna_lab', 'id_pengguna', 'kode_lab', 'id_pengguna', 'kode_lab');
     }
 
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class, 'user_id', 'id_pengguna');
+    }
+
     public function isAdmin()
     {
         return $this->role === 'admin';
@@ -49,5 +56,23 @@ class Pengguna extends Authenticatable
     public function isAsistenLab()
     {
         return $this->role === 'asistenlab';
+    }
+
+    public function hasLabAccess($kode_lab)
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+        
+        return $this->laboratoriums()->where('kode_lab', $kode_lab)->exists();
+    }
+
+    public function getAccessibleLabs()
+    {
+        if ($this->isAdmin()) {
+            return Laboratorium::all();
+        }
+        
+        return $this->laboratoriums;
     }
 }

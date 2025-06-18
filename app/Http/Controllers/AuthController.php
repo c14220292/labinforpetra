@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -14,60 +14,71 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
+    public function redirectToGoogle()
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        return Socialite::driver('google')->redirect();
+    }
 
-        $pengguna = Pengguna::where('email', $request->email)->first();
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            
+            $user = Pengguna::where('google_id', $googleUser->id)
+                           ->orWhere('email', $googleUser->email)
+                           ->first();
 
-        if ($pengguna && Hash::check($request->password, $pengguna->password)) {
-            if ($pengguna->role) {
-                Auth::login($pengguna);
+            if ($user) {
+                // Update Google ID if not set
+                if (!$user->google_id) {
+                    $user->update([
+                        'google_id' => $googleUser->id,
+                        'avatar' => $googleUser->avatar,
+                    ]);
+                }
                 
                 // Update last login
-                $pengguna->update(['last_login' => now()]);
+                $user->update(['last_login' => now()]);
+                
+                Auth::login($user);
                 
                 // Redirect based on role
-                switch ($pengguna->role) {
-                    case 'admin':
-                        return redirect()->route('admin.dashboard');
-                    case 'kepalalab':
-                        return redirect()->route('kepalalab.dashboard');
-                    case 'asistenlab':
-                        return redirect()->route('asistenlab.dashboard');
-                }
+                return $this->redirectBasedOnRole($user);
             } else {
-                return back()->withErrors(['email' => 'Akun anda belum divalidasi, harap menunggu manajemen role dari admin.']);
+                // Create new user
+                $user = Pengguna::create([
+                    'nama_pengguna' => $googleUser->name,
+                    'email' => $googleUser->email,
+                    'google_id' => $googleUser->id,
+                    'avatar' => $googleUser->avatar,
+                    'role' => null, // Will be assigned by admin
+                ]);
+
+                Auth::login($user);
+                
+                return redirect()->route('dashboard')->with('info', 'Akun berhasil dibuat. Harap menunggu admin untuk memberikan role dan akses laboratorium.');
             }
+        } catch (\Exception $e) {
+            return redirect()->route('login')->with('error', 'Terjadi kesalahan saat login dengan Google.');
+        }
+    }
+
+    private function redirectBasedOnRole($user)
+    {
+        if (!$user->role) {
+            return redirect()->route('dashboard')->with('info', 'Akun anda belum divalidasi, harap menunggu manajemen role dari admin.');
         }
 
-        return back()->withErrors(['email' => 'Email atau password salah!']);
-    }
-
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
-
-    public function register(Request $request)
-    {
-        $request->validate([
-            'nama_pengguna' => 'required|string|max:100',
-            'email' => 'required|email|unique:pengguna,email',
-            'password' => 'required|min:6|confirmed',
-        ]);
-
-        Pengguna::create([
-            'nama_pengguna' => $request->nama_pengguna,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => null,
-        ]);
-
-        return redirect()->route('login')->with('success', 'Registrasi berhasil, harap menunggu manajemen role dari admin.');
+        switch ($user->role) {
+            case 'admin':
+                return redirect()->route('admin.dashboard');
+            case 'kepalalab':
+                return redirect()->route('kepalalab.dashboard');
+            case 'asistenlab':
+                return redirect()->route('asistenlab.dashboard');
+            default:
+                return redirect()->route('dashboard');
+        }
     }
 
     public function logout()

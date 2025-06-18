@@ -1,33 +1,67 @@
-<header class="bg-white border-b-4 border-petra-orange shadow-sm">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div class="flex items-center space-x-4">
-            <img src="https://upload.wikimedia.org/wikipedia/id/thumb/4/4d/UK_PETRA_LOGO.svg/1200px-UK_PETRA_LOGO.svg.png" 
-                 alt="Petra Logo" class="h-10">
-            <img src="https://petra.ac.id/img/logo-text.2e8a4502.png" 
-                 alt="PCU Logo" class="h-10">
+<header class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="flex justify-between items-center px-6 py-4">
+        <div>
+            <h1 class="text-2xl font-bold text-petra-blue">@yield('page-title', 'Dashboard')</h1>
+            <p class="text-gray-600 text-sm">@yield('page-description', 'Selamat datang di sistem manajemen laboratorium')</p>
         </div>
 
         @auth
         <div class="relative">
             <button onclick="toggleUserPopup()" 
-                    class="flex items-center space-x-2 bg-gray-100 border border-gray-300 rounded px-3 py-2 hover:bg-gray-200 transition">
-                <span class="text-sm">{{ auth()->user()->nama_pengguna }}</span>
-                <i class="fas fa-user-circle text-gray-600"></i>
+                    class="flex items-center space-x-3 bg-gray-100 border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-200 transition">
+                @if(auth()->user()->avatar)
+                    <img src="{{ auth()->user()->avatar }}" alt="Avatar" class="w-8 h-8 rounded-full">
+                @else
+                    <i class="fas fa-user-circle text-gray-600 text-xl"></i>
+                @endif
+                <div class="text-left">
+                    <div class="text-sm font-medium">{{ auth()->user()->nama_pengguna }}</div>
+                    <div class="text-xs text-gray-500">{{ ucfirst(auth()->user()->role ?? 'Belum ada role') }}</div>
+                </div>
+                <i class="fas fa-chevron-down text-gray-400"></i>
             </button>
             
             <div id="userPopup" 
-                 class="hidden absolute right-0 top-12 bg-white border border-gray-300 rounded-lg shadow-lg p-4 w-72 z-50">
-                <p class="text-sm mb-2"><strong>Nama:</strong> {{ auth()->user()->nama_pengguna }}</p>
-                <p class="text-sm mb-2"><strong>Email:</strong> {{ auth()->user()->email }}</p>
-                <p class="text-sm mb-4"><strong>Role:</strong> {{ ucfirst(auth()->user()->role) }}</p>
-                <form action="{{ route('logout') }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" 
-                            onclick="return confirm('Apakah Anda yakin ingin logout?')"
-                            class="bg-petra-orange text-white px-3 py-2 rounded text-sm hover:bg-orange-600 transition">
-                        Logout
-                    </button>
-                </form>
+                 class="hidden absolute right-0 top-12 bg-white border border-gray-300 rounded-lg shadow-lg w-80 z-50">
+                <div class="p-4 border-b">
+                    <div class="flex items-center space-x-3">
+                        @if(auth()->user()->avatar)
+                            <img src="{{ auth()->user()->avatar }}" alt="Avatar" class="w-12 h-12 rounded-full">
+                        @else
+                            <i class="fas fa-user-circle text-gray-600 text-3xl"></i>
+                        @endif
+                        <div>
+                            <p class="font-medium">{{ auth()->user()->nama_pengguna }}</p>
+                            <p class="text-sm text-gray-500">{{ auth()->user()->email }}</p>
+                            <p class="text-xs text-petra-blue">{{ ucfirst(auth()->user()->role ?? 'Belum ada role') }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                @if(auth()->user()->role && auth()->user()->laboratoriums->count() > 0)
+                <div class="p-4 border-b">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Akses Laboratorium:</p>
+                    <div class="flex flex-wrap gap-1">
+                        @foreach(auth()->user()->laboratoriums as $lab)
+                            <span class="inline-block bg-petra-blue text-white text-xs px-2 py-1 rounded">
+                                {{ $lab->kode_lab }}
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+                
+                <div class="p-4">
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" 
+                                onclick="return confirm('Apakah Anda yakin ingin logout?')"
+                                class="w-full bg-petra-orange text-white px-4 py-2 rounded hover:bg-orange-600 transition flex items-center justify-center space-x-2">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
         @endauth
